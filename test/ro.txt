@@ -1,0 +1,10 @@
+Currently Loaded Modulefiles:
+  1) git/2.9.0                   6) phdf5/1.8.17-IntelMPI-bis
+  2) intel-compilers/17.0.4      7) python/2.7.12
+  3) intel-mkl/11.3.3            8) fftw/3.3.4
+  4) intel-mpi/5.1.2             9) paraview/5.1.2
+  5) cmake/3.6.3                10) metis/5.1.0
+ Input file:           5
+ nfiles =            2
+average.h5                                                                                                                                                                                              
+fluct.h5                                                                                                                                                                                                

@@ -1,0 +1,31 @@
+<?xml version="1.0" ?>
+<Xdmf Version="2.0">
+ <Domain>
+   <DataItem Name="Vs" Format="HDF" DataType="Float" Precision="8" Dimensions="300 300 300">
+        ./average.h5:/samples
+   </DataItem>
+  <Grid GridType="Collection" CollectionType="Spatial">
+   <Grid Name="Group1">
+     <Topology TopologyType="3DCoRectMesh" Dimensions="300 300 300"/>
+     <Geometry GeometryType="ORIGIN_DXDYDZ">
+   <DataItem Name="origin" Format="XML" DataType="Float" Precision="8" Dimensions="3">
+         -49167.9000000000
+        4144420.0000000000
+       15341900.0000000000
+   </DataItem>
+   <DataItem Name="step" Format="XML" DataType="Float" Precision="8" Dimensions="3">
+            167.5922441471
+            169.9665551839
+            227.4247491638
+   </DataItem>
+     </Geometry>
+     <Attribute Name="Vs" Center="Node" AttributeType="Scalar">
+       <DataItem Reference="XML">
+         /Xdmf/Domain/DataItem[@Name="Vs"]
+       </DataItem>
+     </Attribute>
+   </Grid>
+  </Grid>
+ </Domain>
+</Xdmf>
+

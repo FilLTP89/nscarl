@@ -1,0 +1,30 @@
+<?xml version="1.0" ?>
+<Xdmf Version="2.0">
+ <Domain>
+   <DataItem Name="RF_1" Format="HDF" DataType="Float" Precision="8" Dimensions="258 1304 1754">
+        ./fluct.h5:/samples
+   </DataItem>
+  <Grid GridType="Collection" CollectionType="Spatial">
+   <Grid Name="Group1">
+     <Topology TopologyType="3DCoRectMesh" Dimensions="258 1304 1754"/>
+     <Geometry GeometryType="ORIGIN_DXDYDZ">
+   <DataItem Name="origin" Format="XML" DataType="Float" Precision="8" Dimensions="3">
+          -4060.0000000000
+        4143760.0000000000
+       15340800.0000000000
+   </DataItem>
+   <DataItem Name="step" Format="XML" DataType="Float" Precision="8" Dimensions="3">
+             20.0000000000
+             40.0000000000
+             40.0000000000
+   </DataItem>
+     </Geometry>
+     <Attribute Name="RF1" Center="Node" AttributeType="Scalar">
+       <DataItem Reference="XML">
+         /Xdmf/Domain/DataItem[@Name="RF_1"]
+       </DataItem>
+     </Attribute>
+   </Grid>
+  </Grid>
+ </Domain>
+</Xdmf>
