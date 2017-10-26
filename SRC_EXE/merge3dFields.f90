@@ -46,8 +46,9 @@ program merge3dFields
         allocate(xMaxGlob(0:3*nfm-1))
         do i_=0,nfm-1
             read(*,'(A)') fnm(i_)
-            write(*,'(A)') trim(fnm(i_))
-            call h5fopen_f(trim(fnm(i_)), H5F_ACC_RDONLY_F, fid, hdferr)
+            fnm(i_) = "./"//trim(adjustL(fnm(i_)))  
+            write(*,'(A)') fnm(i_)
+            call h5fopen_f(fnm(i_), H5F_ACC_RDONLY_F, fid, hdferr)
             call read_attr_real_vec(fid, 'xMinGlob',xMinGlob(3*(i_-1):3*i_-1))
             call read_attr_real_vec(fid, 'xMaxGlob',xMaxGlob(3*(i_-1):3*i_-1))
             call h5fclose_f(fid, hdferr)
