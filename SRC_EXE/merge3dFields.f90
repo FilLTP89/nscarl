@@ -24,15 +24,16 @@ program merge3dFields
     integer :: nfm ! number of file to be read
     character(len=200), allocatable, dimension(:) :: fnm ! file names
 
-    integer :: i_ ! counters
+    integer :: i_,j_ ! counters
     integer ::hdferr ! hdf5 error variable
     integer(HID_T) :: fid ! hdf5 file identifier
 
     ! attributes
     real(fpp), allocatable, dimension(:) :: xMinGlob
     real(fpp), allocatable, dimension(:) :: xMaxGlob
+    real(fpp), dimension(0:5) :: xLimBound
 
-
+    
     comm = MPI_COMM_WORLD
     call init(comm)
     call init_hdf5()
@@ -44,6 +45,8 @@ program merge3dFields
         allocate(fnm(0:nfm-1))
         allocate(xMinGlob(0:3*nfm-1))
         allocate(xMaxGlob(0:3*nfm-1))
+
+        xLimBound(0:5) = 1e+20
         do i_=0,nfm-1
             read(*,'(A)') fnm(i_)
             fnm(i_) = "./"//trim(adjustL(fnm(i_)))  
@@ -52,7 +55,13 @@ program merge3dFields
             call read_attr_real_vec(fid, 'xMinGlob',xMinGlob(3*(i_-1):3*i_-1))
             call read_attr_real_vec(fid, 'xMaxGlob',xMaxGlob(3*(i_-1):3*i_-1))
             call h5fclose_f(fid, hdferr)
+            do j_=0,2
+                xLimBound(0+j_) = min(xLimBound(0+j_),xMinGlob(3*(i_-1)+j_))
+                xLimBound(3+j_) = min(xLimBound(3+j_),xMaxGlob(3*(i_-1)+j_))
+            end do
         end do
+        write(*,*) 'Min. Box Limits', xLimBound(0:2)
+        write(*,*) 'Max. Box Limits', xLimBound(3:5)
     end if
 
     call MPI_BCAST (nfm, 1, MPI_INTEGER, 0, comm, code)

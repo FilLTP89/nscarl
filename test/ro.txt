@@ -8,3 +8,7 @@ Currently Loaded Modulefiles:
  nfiles =            2
 ./average.h5                                                                                                                                                                                            
 ./fluct.h5                                                                                                                                                                                              
+ Min. Box Limits   15340800.0000000        4143760.00000000     
+  -49167.9000000000     
+ Max. Box Limits   15409900.0000000        4195240.00000000     
+   942.181000000000     
