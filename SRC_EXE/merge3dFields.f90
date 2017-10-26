@@ -2,8 +2,8 @@ program merge3dFields
 
     use mpi
     use hdf5
-    use constants_RF
-    use hdf5_RF
+    use constants
+    use sem_hdf5
 
 #ifdef f2003
     use, intrinsic :: iso_fortran_env, only : stdin=>input_unit, &
@@ -21,26 +21,36 @@ program merge3dFields
     integer :: code, rk_, npr, comm; ! mpi communicator variables
 
     character(len=200) :: fld ! main working path
-    integer,parameter :: fid=8 ! logic unit for input file
     integer :: nfm ! number of file to be read
-    character(len=200), allocatable, dimension(:) :: fnm
+    character(len=200), allocatable, dimension(:) :: fnm ! file names
 
-    !LOCAL
     integer :: i_ ! counters
+    integer ::hdferr ! hdf5 error variable
+    integer(HID_T) :: fid ! hdf5 file identifier
+
+    ! attributes
+    real(fpp), allocatable, dimension(:) :: xMinGlob
+    real(fpp), allocatable, dimension(:) :: xMaxGlob
 
 
     comm = MPI_COMM_WORLD
     call init(comm)
+    call init_hdf5()
 
     if(rk_ == 0) then
         write(*,*) 'Input file:',stdin
         read(*,'(I8)') nfm
         write(*,*) "nfiles = ", nfm
         allocate(fnm(0:nfm-1))
+        allocate(xMinGlob(0:3*nfm-1))
+        allocate(xMaxGlob(0:3*nfm-1))
         do i_=0,nfm-1
             read(*,'(A)') fnm(i_)
-            write(*,'(A)') fnm(i_)
-            call read_attr_real(dset, 'xMinGlob',0)
+            write(*,'(A)') trim(fnm(i_))
+            call h5fopen_f(trim(fnm(i_)), H5F_ACC_RDONLY_F, fid, hdferr)
+            call read_attr_real_vec(fid, 'xMinGlob',xMinGlob(3*(i_-1):3*i_-1))
+            call read_attr_real_vec(fid, 'xMaxGlob',xMaxGlob(3*(i_-1):3*i_-1))
+            call h5fclose_f(fid, hdferr)
         end do
     end if
 

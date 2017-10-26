@@ -6,5 +6,85 @@ Currently Loaded Modulefiles:
   5) cmake/3.6.3                10) metis/5.1.0
  Input file:           5
  nfiles =            2
-average.h5                                                                                                                                                                                              
-fluct.h5                                                                                                                                                                                                
+average.h5
+fluct.h5
+HDF5-DIAG: Error detected in HDF5 (1.8.17) MPI-process 0:
+  #000: H5F.c line 604 in H5Fopen(): unable to open file
+    major: File accessibilty
+    minor: Unable to open file
+  #001: H5Fint.c line 1087 in H5F_open(): unable to read superblock
+    major: File accessibilty
+    minor: Read failed
+  #002: H5Fsuper.c line 294 in H5F_super_read(): unable to load superblock
+    major: Object cache
+    minor: Unable to protect metadata
+  #003: H5AC.c line 1262 in H5AC_protect(): H5C_protect() failed.
+    major: Object cache
+    minor: Unable to protect metadata
+  #004: H5C.c line 3574 in H5C_protect(): can't load entry
+    major: Object cache
+    minor: Unable to load metadata into cache
+  #005: H5C.c line 7954 in H5C_load_entry(): unable to load entry
+    major: Object cache
+    minor: Unable to load metadata into cache
+  #006: H5Fsuper_cache.c line 476 in H5F_sblock_load(): truncated file: eof = 2810183680, sblock->base_addr = 0, stored_eoa = 4720818288
+    major: File accessibilty
+    minor: File has been truncated
+HDF5-DIAG: Error detected in HDF5 (1.8.17) MPI-process 0:
+  #000: H5A.c line 401 in H5Aopen(): not a location
+    major: Invalid arguments to routine
+    minor: Inappropriate type
+  #001: H5Gloc.c line 173 in H5G_loc(): invalid file ID
+    major: Invalid arguments to routine
+    minor: Bad value
+HDF5-DIAG: Error detected in HDF5 (1.8.17) MPI-process 0:
+  #000: H5A.c line 677 in H5Aget_space(): not an attribute
+    major: Invalid arguments to routine
+    minor: Inappropriate type
+HDF5-DIAG: Error detected in HDF5 (1.8.17) MPI-process 0:
+  #000: H5S.c line 791 in H5Sget_simple_extent_ndims(): not a dataspace
+    major: Invalid arguments to routine
+    minor: Inappropriate type
+HDF5-DIAG: Error detected in HDF5 (1.8.17) MPI-process 0:
+  #000: H5A.c line 634 in H5Aread(): not an attribute
+    major: Invalid arguments to routine
+    minor: Inappropriate type
+HDF5-DIAG: Error detected in HDF5 (1.8.17) MPI-process 0:
+  #000: H5A.c line 1602 in H5Aclose(): not an attribute
+    major: Invalid arguments to routine
+    minor: Inappropriate type
+HDF5-DIAG: Error detected in HDF5 (1.8.17) MPI-process 0:
+  #000: H5S.c line 392 in H5Sclose(): not a dataspace
+    major: Invalid arguments to routine
+    minor: Inappropriate type
+HDF5-DIAG: Error detected in HDF5 (1.8.17) MPI-process 0:
+  #000: H5A.c line 401 in H5Aopen(): not a location
+    major: Invalid arguments to routine
+    minor: Inappropriate type
+  #001: H5Gloc.c line 173 in H5G_loc(): invalid file ID
+    major: Invalid arguments to routine
+    minor: Bad value
+HDF5-DIAG: Error detected in HDF5 (1.8.17) MPI-process 0:
+  #000: H5A.c line 677 in H5Aget_space(): not an attribute
+    major: Invalid arguments to routine
+    minor: Inappropriate type
+HDF5-DIAG: Error detected in HDF5 (1.8.17) MPI-process 0:
+  #000: H5S.c line 791 in H5Sget_simple_extent_ndims(): not a dataspace
+    major: Invalid arguments to routine
+    minor: Inappropriate type
+HDF5-DIAG: Error detected in HDF5 (1.8.17) MPI-process 0:
+  #000: H5A.c line 634 in H5Aread(): not an attribute
+    major: Invalid arguments to routine
+    minor: Inappropriate type
+HDF5-DIAG: Error detected in HDF5 (1.8.17) MPI-process 0:
+  #000: H5A.c line 1602 in H5Aclose(): not an attribute
+    major: Invalid arguments to routine
+    minor: Inappropriate type
+HDF5-DIAG: Error detected in HDF5 (1.8.17) MPI-process 0:
+  #000: H5S.c line 392 in H5Sclose(): not a dataspace
+    major: Invalid arguments to routine
+    minor: Inappropriate type
+HDF5-DIAG: Error detected in HDF5 (1.8.17) MPI-process 0:
+  #000: H5F.c line 781 in H5Fclose(): invalid file identifier
+    major: Invalid arguments to routine
+    minor: Inappropriate type

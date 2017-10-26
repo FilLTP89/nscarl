@@ -29,38 +29,9 @@ SRCS = $(wildcard *.f90 *.f)
 
 RF_OBJ += ./merge3dFields.o
 
-LIB_OBJ += ./sem_hdf5.o
-#./spectra_RF.o \
-#./writeResultFile_RF.o \
-#./mesh_RF.o \
-#./type_MESH.o \
-#./type_RF.o \
-#./topography_RF.o \
-#./readUNV_RF.o \
-#./localization_RF.o \
-#./type_inputRF.o \
-#./sample_RF.o \
-#./calls_RF.o \
-#./ranlib.o \
-#./rnglib.o \
-#./ipmpar.o \
-#./spmpar.o \
-#./cumnor.o \
-#./devlpl.o \
-#./stvaln.o \
-#./dinvnr.o \
-#./cdfnor.o
+LIB_OBJ += ./sem_hdf5.o 
 
-#STAT_OBJ += ./main_Stat.o \
-#./statistics_RF.o \
-#./type_STAT.o
-
-COMM_OBJ += ./constants_RF.o \
-./constants.o \
-./hdf5_RF.o
-
-#./type_TEST.o \
-#./test_func_RF.o \
+COMM_OBJ += ./constants.o
 
 #LIBS = $(LIBHDF5) $(LIBMPI) $(LIBFFTW)
 #INCLUDE = $(INCLUDEHDF5) $(INCLUDEMPI) $(INCLUDEFFTW)
@@ -68,10 +39,10 @@ LIBS = $(LIBHDF5) $(LIBMPI)
 INCLUDE = $(INCLUDEHDF5) $(INCLUDEMPI) 
 
 #Dependencies
-merge3dFields.o 	 : constants_RF.o \
-				hdf5_RF.o			  	
+merge3dFields.o 	 : sem_hdf5.o \
+				constants.o			  	
 
-sem_hdf5.o           : constants_RF.o
+sem_hdf5.o           : constants.o
 # Making all the ".o" from the ".f90"
 %.o: ../SRC_EXE/%.f90
 	@echo 'Building file: $<'
@@ -89,13 +60,12 @@ sem_hdf5.o           : constants_RF.o
 
 # All Target
 all: merge3dFields
-#all: randomField
 
 # Tool invocations
-merge3dFields: $(RF_OBJ) $(COMM_OBJ)
+merge3dFields: $(RF_OBJ) $(LIB_OBJ) $(COMM_OBJ)
 		@echo 'Building target: $@'
 		@echo 'Invoking: Fortran Linker'
-		$(FC) -o $(EXEC) $(FFLAGS) $(RF_OBJ) $(COMM_OBJ) $(INCLUDE) $(LIBS)
+		$(FC) -o $(EXEC) $(FFLAGS) $(RF_OBJ) $(LIB_OBJ) $(COMM_OBJ) $(INCLUDE) $(LIBS)
 		@echo 'Finished building target: $@'
 		@echo ' '	
 	
@@ -106,12 +76,12 @@ merge3dFields: $(RF_OBJ) $(COMM_OBJ)
 #		@echo 'Finished building target: $@'
 #		@echo ' '
 
-#RFlib: $(LIB_OBJ) $(COMM_OBJ)
-#		@echo  'Building target: $@'
-#		@echo  'Invoking: Fortran Linker'
-#		ar rc  $(LIB1) $(LIB_OBJ) $(COMM_OBJ) $(LIBS)
-#		@echo  'Finished building target: $@'
-#		@echo ' '
+RFlib: $(LIB_OBJ) $(COMM_OBJ)
+		@echo  'Building target: $@'
+		@echo  'Invoking: Fortran Linker'
+		ar rc  $(LIB_OBJ) $(COMM_OBJ) $(LIBS)
+		@echo  'Finished building target: $@'
+		@echo ' '
 #
 #RFexe: $(RF_OBJ) $(COMM_OBJ)
 #		@echo 'Building target: $@'
@@ -123,7 +93,7 @@ merge3dFields: $(RF_OBJ) $(COMM_OBJ)
 
 # Other Targets
 clean:
-		-$(RM) $(LIB1) $(EXEC) $(RF_OBJ) $(COMM_OBJ) *.mod
+		-$(RM) $(EXEC) $(RF_OBJ) $(COMM_OBJ) $(LIB_OBJ) *.mod
 		-@echo 'Finished excluding'
 
 .PHONY: all clean dependents
