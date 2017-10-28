@@ -6,9 +6,17 @@ Currently Loaded Modulefiles:
   5) cmake/3.6.3                10) metis/5.1.0
  Input file:           5
  nfiles =            2
+FILE:
 ./average.h5                                                                                                                                                                                            
+ DIMS:                   300                   300                   300
+FILE:
 ./fluct.h5                                                                                                                                                                                              
+ DIMS:                  1754                  1304                   258
+           5
+ Dims:         300         300         300        1754        1304         258
  Min. Box Limits   15340800.0000000        4143760.00000000     
   -49167.9000000000     
  Max. Box Limits   15409900.0000000        4195240.00000000     
    942.181000000000     
+ Delta X         227         169         167          40          40          20
+ xSplit   13820.0000000000        10296.0000000000        8351.68016666667     

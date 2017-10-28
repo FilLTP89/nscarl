@@ -5,7 +5,7 @@
 #PBS -o ro.txt
 #PBS -j oe
 #PBS -l walltime=04:00:00
-#PBS -l select=1:ncpus=4:mpiprocs=4
+#PBS -l select=1:ncpus=16:mpiprocs=16
 #PBS -M filippo.gatti@centralesupelec.fr
 #PBS -q haswellq
 #PBS -P omaha
@@ -19,4 +19,4 @@ module load python/2.7.12
 module load phdf5/1.8.17-IntelMPI-bis
 
 cd $PBS_O_WORKDIR
-mpirun -np 4 /home/gattif/nscarl/build/merge3dFields.exe < merge_het.txt
+mpirun -np 16 /home/gattif/nscarl/build/merge3dFields.exe < merge_het.txt

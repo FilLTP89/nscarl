@@ -29,7 +29,8 @@ SRCS = $(wildcard *.f90 *.f)
 
 RF_OBJ += ./merge3dFields.o
 
-LIB_OBJ += ./sem_hdf5.o 
+LIB_OBJ += ./sem_hdf5.o \
+		  ./matStructure.o 
 
 COMM_OBJ += ./constants.o
 
@@ -40,9 +41,14 @@ INCLUDE = $(INCLUDEHDF5) $(INCLUDEMPI)
 
 #Dependencies
 merge3dFields.o 	 : sem_hdf5.o \
-				constants.o			  	
+				constants.o	\
+			    matStructure.o			
+
+matStructure.o		 : constants.o \
+				sem_hdf5.o
 
 sem_hdf5.o           : constants.o
+
 # Making all the ".o" from the ".f90"
 %.o: ../SRC_EXE/%.f90
 	@echo 'Building file: $<'
