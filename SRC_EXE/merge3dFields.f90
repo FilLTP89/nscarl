@@ -38,6 +38,7 @@ program merge3dFields
     real(fpp), dimension(0:2) :: dxSplit
     real(fpp), dimension(:), allocatable :: xSplit, deltax  
     ! data samples
+    integer(fpp), dimension(:,:), allocatable :: idxg
     real(fpp), allocatable, dimension(:,:,:) :: datasamples
 
     comm = MPI_COMM_WORLD
@@ -85,17 +86,10 @@ program merge3dFields
         end do
     end do
     ! partitioning
-    npt(0) = max(nint(npr/3.0),1)
+    npt(0) = ceiling(npr**(1.0/3.0))
     npt(1) = npt(0) 
-    npt(2) = npr-2*npt(0)
-    if (rk_==7) then
-    write(*,*) '---------------'
-    write(*,*) 'partition - ',rk_
-    write(*,*) npt
-    write(*,*) rk_/npt(0)
-    write(*,*) rk_/npt(1)
-    write(*,*) rk_/npt(2)
-    end if
+    npt(2) = npr-product(npt(0:1))
+    if (rk_==0) write(*,*) 'npt',npt
     allocate(xSplit(0:npr+2))
     k_=0
     do i_=0,2
@@ -105,11 +99,10 @@ program merge3dFields
         end do
         k_=k_+npt(i_)+1
     end do
-
-    !    xLimBoundLoc(0) = xSplit(rk_
-    !    call nscarl_init_prop_file_field(fnm(i_), prop(i_), xLimBoundLoc, var)   
-    !end do
-
+    allocate(idxg(0:2,0:npr-1))
+    if (rk_.eq.0)  call create_global_index(npr,npt,3,idxg)
+    if (rk_.eq.0) write(*,*) idxg
+    call MPI_BARRIER(comm,code)
     deallocate(dims)
     deallocate(fnm)
     call finalize()

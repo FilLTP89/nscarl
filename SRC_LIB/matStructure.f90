@@ -136,7 +136,36 @@ contains
         call read_dims(fid, "samples", dimst)
         dims=dimst 
         call h5fclose_f(fid, hdferr)
-    end subroutine
+    end subroutine parse_mf_prop_nscarl
+
+    subroutine create_global_index(npr,npt,dims,idxg)
+        implicit none
+        integer, intent(in) :: npr,dims
+        integer(fpp), intent(in), dimension(0:dims-1) :: npt
+        integer(fpp), intent(inout), dimension(0:2,0:npr-1) :: idxg
+        integer :: i_,j_,k_,c_,cc_,ccc_
+
+        idxg=0
+        c_=0
+        cc_=0
+        ccc_=0
+        if (dims.eq.3) then
+            do k_=0,npt(2)-1
+                ccc_=ccc_+k_*npt(1)*npt(0)
+                do j_=0,npt(1)-1
+                    cc_=ccc_+j_*npt(0)
+                    do i_=0,npt(0)-1
+                        c_ = cc_+i_
+                        write(*,*) 'c_',ccc_,cc_,c_
+                        idxg(0,c_)=i_
+                        idxg(1,c_)=j_
+                        idxg(2,c_)=k_
+                    end do
+                end do
+            end do 
+        end if
+        
+    end subroutine create_global_index
 
 !    subroutine nscarl_init_prop_file_field(fnm, propName, xLimBoundLoc, var)
 !        use hdf5
