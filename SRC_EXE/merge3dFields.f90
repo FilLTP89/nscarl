@@ -28,15 +28,15 @@ program merge3dFields
 
     ! counters 
     integer :: i_,j_,k_
-
+    integer :: nf,np
     ! attributes
-    real(fpp), dimension(0:5) :: xLimBound, xLimBoundLoc
+    real(fpp), dimension(0:5) :: xLimBound
     integer(fpp), dimension(0:2) :: dimst, npt
     real(fpp), dimension(0:2) :: xMinGlob, xMaxGlob
 
     ! partitioning
     real(fpp), dimension(0:2) :: dxSplit
-    real(fpp), dimension(:), allocatable :: xSplit, deltax
+    real(fpp), dimension(:), allocatable :: xSplit, deltax  
     ! data samples
     real(fpp), allocatable, dimension(:,:,:) :: datasamples
 
@@ -48,66 +48,70 @@ program merge3dFields
         write(*,*) 'Input file:',stdin
         read(*,'(I8)') nfm
         write(*,*) "nfiles = ", nfm
-        allocate(fnm(0:nfm-1))
-        allocate(prop(0:nfm-1))
-        allocate(dims(0:3*nfm-1))
-        allocate(deltax(0:3*nfm-1))
-        xLimBound(0:5) = 1e+20
+    end if    
+    call MPI_BCAST(nfm, 1, MPI_INTEGER, 0, comm, code) 
+    allocate(fnm(0:nfm-1))
+    allocate(prop(0:nfm-1))
+    if(rk_ == 0) then
+        nf=0
+        np=0
         do i_=0,nfm-1
             read(*,'(A)') fnm(i_)
             fnm(i_) = "./"//trim(adjustL(fnm(i_)))  
+            nf=nf+len(fnm(i_))
             write(*,*) 'FILE:',fnm(i_)
             read(*,*) prop(i_) 
             prop(i_) = trim(adjustL(prop(i_)))  
+            np=np+len(prop(i_))
             write(*,*) 'PROP:',prop(i_)
-            call parse_mf_prop_nscarl(fnm(i_),xMinGlob,xMaxGlob,dimst)
-            dims(3*i_:3*(i_+1)-1) = dimst
-            write(*,*) 'DIMS:', dimst
-            do j_=0,2
-                deltax(3*i_+j_) = (xMaxGlob(j_)-xMinGlob(j_))/(dims(3*i_+j_)-1)
-                xLimBound(0+j_) = min(xLimBound(0+j_),xMinGlob(j_))
-                xLimBound(3+j_) = min(xLimBound(3+j_),xMaxGlob(j_))
-            end do
         end do
         close(stdin,status='keep')
-        ! partitioning
-        npt(0) = max(nint(npr/3.0),1)
-        npt(1) = npt(0) 
-        npt(2) = npr-2*npt(0)
-        write(*,*) 'npt',npt
-        allocate(xSplit(0:npr+2))
-        k_=0
-        do i_=0,2
-            dxSplit(i_) = (xLimBound(3+i_)-xLimBound(i_))/npt(i_)
-            do j_=0,npt(i_)
-                xSplit(k_+j_) = xLimBound(i_)+dxSplit(i_)*j_
-            end do
-            k_=k_+npt(i_)+1
+    end if    
+    call MPI_BCAST(nf, 1, MPI_INTEGER, 0, comm, code) 
+    call MPI_BCAST(np, 1, MPI_INTEGER, 0, comm, code) 
+    call MPI_BCAST(fnm, nf, MPI_CHARACTER, 0, comm, code) 
+    call MPI_BCAST(prop, np, MPI_CHARACTER, 0, comm, code) 
+    allocate(dims(0:3*nfm-1))
+    allocate(deltax(0:3*nfm-1))
+    xLimBound(0:5) = 1e+20
+    do i_=0,nfm-1
+        call parse_mf_prop_nscarl(fnm(i_),xMinGlob,xMaxGlob,dimst)
+        dims(3*i_:3*(i_+1)-1) = dimst
+        if (rk_.eq.0) write(*,*) 'DIMS:', dimst
+        do j_=0,2
+            deltax(3*i_+j_) = (xMaxGlob(j_)-xMinGlob(j_))/(dims(3*i_+j_)-1)
+            xLimBound(0+j_) = min(xLimBound(0+j_),xMinGlob(j_))
+            xLimBound(3+j_) = min(xLimBound(3+j_),xMaxGlob(j_))
         end do
-        write(*,*) 'Dims:',dims
-        write(*,*) 'Min. Box Limits', xLimBound(0:2)
-        write(*,*) 'Max. Box Limits', xLimBound(3:5)
-        write(*,*) 'Delta X',deltax
-        write(*,*) 'Delta Split X',dxSplit
-        write(*,*) 'xSplit',xSplit
-        call MPI_BCAST(nfm, 1, MPI_INTEGER, 0, comm, code)
-        call MPI_BCAST(xLimBound, 6, MPI_DOUBLE_PRECISION, 0, comm, code)
-        call MPI_BCAST(deltax, 3*nfm, MPI_DOUBLE_PRECISION,0, comm, code)
-        call MPI_BCAST(xSplit, npr+2, MPI_DOUBLE_PRECISION, 0, comm, code)
+    end do
+    ! partitioning
+    npt(0) = max(nint(npr/3.0),1)
+    npt(1) = npt(0) 
+    npt(2) = npr-2*npt(0)
+    if (rk_==7) then
+    write(*,*) '---------------'
+    write(*,*) 'partition - ',rk_
+    write(*,*) npt
+    write(*,*) rk_/npt(0)
+    write(*,*) rk_/npt(1)
+    write(*,*) rk_/npt(2)
     end if
-    call MPI_BARRIER(comm, code) 
-!    do i_=0,nfm-1
-!        
-!        do j_=0,2
-!            xLimBoundLoc(j_)=gcoord(
-!        end do
-!        call nscarl_init_prop_file_field(fnm(i_), prop(i_), xLimBoundLoc, var)   
-!    end do
+    allocate(xSplit(0:npr+2))
+    k_=0
+    do i_=0,2
+        dxSplit(i_) = (xLimBound(3+i_)-xLimBound(i_))/npt(i_)
+        do j_=0,npt(i_)
+            xSplit(k_+j_) = xLimBound(i_)+dxSplit(i_)*j_
+        end do
+        k_=k_+npt(i_)+1
+    end do
 
-    if(rk_ == 0) then
-        deallocate(dims)
-        deallocate(fnm)
-    end if
+    !    xLimBoundLoc(0) = xSplit(rk_
+    !    call nscarl_init_prop_file_field(fnm(i_), prop(i_), xLimBoundLoc, var)   
+    !end do
+
+    deallocate(dims)
+    deallocate(fnm)
     call finalize()
 
     contains
