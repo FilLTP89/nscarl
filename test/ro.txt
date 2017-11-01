@@ -6,11 +6,23 @@ Currently Loaded Modulefiles:
   5) cmake/3.6.3                10) metis/5.1.0
  Input file:           5
  nfiles =            2
-FILE:
-./average.h5                                                                                                                                                                                            
+ FILE:
+ ./average.h5                                                                   
+                                                                                
+                                           
+ PROP:
+ Vs                                                                             
+                                                                                
+                                           
  DIMS:                   300                   300                   300
-FILE:
-./fluct.h5                                                                                                                                                                                              
+ FILE:
+ ./fluct.h5                                                                     
+                                                                                
+                                           
+ PROP:
+ RF_1                                                                           
+                                                                                
+                                           
  DIMS:                  1754                  1304                   258
            5
  Dims:         300         300         300        1754        1304         258
