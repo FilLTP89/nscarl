@@ -23,19 +23,23 @@ program merge3dFields
 
     character(len=200) :: fld ! main working path
     integer :: nfm ! number of file to be read
-    character(len=200), allocatable, dimension(:) :: fnm ! file names
+    character(len=200), allocatable, dimension(:) :: fnm,prop ! file names
     integer, dimension(:), allocatable :: dims,deltax
 
-    integer :: i_,j_ ! counters
+    ! counters 
+    integer :: i_,j_
 
     ! attributes
-    real(fpp), dimension(0:5) :: xLimBound
+    real(fpp), dimension(0:5) :: xLimBound, xLimBoundLoc
     integer(fpp), dimension(0:2) :: dimst
     real(fpp), dimension(0:2) :: xMinGlob, xMaxGlob
 
     ! partitioning
     real(fpp), dimension(0:2) :: xSplit
     
+    ! data samples
+    real(fpp), allocatable, dimension(:,:,:) :: datasamples
+
     comm = MPI_COMM_WORLD
     call init(comm)
     call init_hdf5()
@@ -45,13 +49,17 @@ program merge3dFields
         read(*,'(I8)') nfm
         write(*,*) "nfiles = ", nfm
         allocate(fnm(0:nfm-1))
+        allocate(prop(0:nfm-1))
         allocate(dims(0:3*nfm-1))
         allocate(deltax(0:3*nfm-1))
         xLimBound(0:5) = 1e+20
         do i_=0,nfm-1
             read(*,'(A)') fnm(i_)
             fnm(i_) = "./"//trim(adjustL(fnm(i_)))  
-            write(*,'(A)') 'FILE:',fnm(i_)
+            write(*,*) 'FILE:',fnm(i_)
+            read(*,*) prop(i_) 
+            prop(i_) = trim(adjustL(prop(i_)))  
+            write(*,*) 'PROP:',prop(i_)
             call parse_mf_prop_nscarl(fnm(i_),xMinGlob,xMaxGlob,dimst)
             dims(3*i_:3*(i_+1)-1) = dimst
             write(*,*) 'DIMS:', dimst
@@ -61,19 +69,31 @@ program merge3dFields
                 xLimBound(3+j_) = min(xLimBound(3+j_),xMaxGlob(j_))
             end do
         end do
+        close(stdin,status='keep')
         ! partitioning
         write(*,*) nint(npr/3.0)
         xSplit(0) = (xLimBound(3)-xLimBound(0))/max(nint(npr/3.0),1) 
         xSplit(1) = (xLimBound(4)-xLimBound(1))/max(nint(npr/3.0),1) 
         xSplit(2) = (xLimBound(5)-xLimBound(2))/(npr-2*max(nint(npr/3.0),1)) 
+
         write(*,*) 'Dims:',dims
         write(*,*) 'Min. Box Limits', xLimBound(0:2)
         write(*,*) 'Max. Box Limits', xLimBound(3:5)
         write(*,*) 'Delta X',deltax
         write(*,*) 'xSplit',xSplit
+        call MPI_BCAST(nfm, 1, MPI_INTEGER, 0, comm, code)
+        call MPI_BCAST(xLimBound, 6, MPI_DOUBLE_PRECISION, 0, comm, code)
+        call MPI_BCAST(xSplit, 3, MPI_DOUBLE_PRECISION, 0, comm, code)
+        call MPI_BCAST(deltax, 3, MPI_DOUBLE_PRECISION,0, comm, code)
     end if
     
-    !partitioning
+
+    !do i_=0,nfm-1
+    !    do j_=0:2
+    !        xLimBoundLoc(j_)=gcoord(
+    !    end do
+    !    call nscarl_init_prop_file_field(fnm(i_), prop(i_), xLimBoundLoc, var)   
+    !end do
 
     if(rk_ == 0) then
         deallocate(dims)
@@ -110,4 +130,3 @@ end program merge3dFields
 !! f90-continuation-indent: 4
 !! End:
 !! vim: set sw=4 ts=4 et tw=80 smartindent :
-
