@@ -30,7 +30,7 @@ program merge3dFields
     integer :: i_,j_,k_
     integer :: nf,np
     ! attributes
-    real(fpp), dimension(0:5) :: xLimBound
+    real(fpp), dimension(0:5) :: xLimBound, xLimBoundLoc
     integer(fpp), dimension(0:2) :: dimst, npt
     real(fpp), dimension(0:2) :: xMinGlob, xMaxGlob
 
@@ -39,6 +39,7 @@ program merge3dFields
     real(fpp), dimension(:), allocatable :: xSplit, deltax  
     ! data samples
     integer(fpp), dimension(:,:), allocatable :: idxg
+    integer(fpp), dimension(0:2) :: idxp
     real(fpp), allocatable, dimension(:,:,:) :: datasamples
 
     comm = MPI_COMM_WORLD
@@ -89,7 +90,7 @@ program merge3dFields
     npt(0) = floor(log(real(npr,fpp))/log(3.0d0))
     npt(1) = floor(log(real(npr,fpp))/log(3.0d0))
     npt(2) = floor(log(real(npr,fpp))/log(3.0d0))   
-    allocate(xSplit(0:npr+2))
+    allocate(xSplit(0:sum(npt)+2))
     k_=0
     do i_=0,2
         dxSplit(i_) = (xLimBound(3+i_)-xLimBound(i_))/npt(i_)
@@ -100,10 +101,24 @@ program merge3dFields
     end do
     allocate(idxg(0:2,0:npr-1))
     call create_global_index(npr,npt,3,idxg)
+    idxp = idxg(:,rk_)
+    do i_=1,nfm-1
+        k_=0
+        do j_=0,2
+            xLimBoundLoc(0+j_)=xSplit(k_+idxp(j_))
+            xLimBoundLoc(3+j_)=xSplit(k_+idxp(j_)+1)
+            k_=k_+npt(j_)+1
+        end do
+    end do 
+    if (rk_==7) write(*,*) 'xSplit',xSplit  
+    if (rk_==7) write(*,*) 'xLimBoundLoc',xLimBoundLoc
     call MPI_BARRIER(comm,code)
-
+    
     deallocate(dims)
     deallocate(fnm)
+    deallocate(deltax)
+    deallocate(xSplit)
+    deallocate(idxg)
     call finalize()
 
     contains
