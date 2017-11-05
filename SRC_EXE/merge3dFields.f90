@@ -71,8 +71,8 @@ program merge3dFields
     end if    
     call MPI_BCAST(nf, 1, MPI_INTEGER, 0, comm, code) 
     call MPI_BCAST(np, 1, MPI_INTEGER, 0, comm, code) 
-    call MPI_BCAST(fnm, nf, MPI_CHARACTER, 0, comm, code) 
-    call MPI_BCAST(prop, np, MPI_CHARACTER, 0, comm, code) 
+    call MPI_BCAST(fnm, nf, MPI_CHAR, 0, comm, code) 
+    call MPI_BCAST(prop, np, MPI_CHAR, 0, comm, code) 
     allocate(dims(0:3*nfm-1))
     allocate(deltax(0:3*nfm-1))
     xLimBound(0:5) = 1e+20
@@ -109,16 +109,15 @@ program merge3dFields
             xLimBoundLoc(3+j_)=xSplit(k_+idxp(j_)+1)
             k_=k_+npt(j_)+1
         end do
+        call nscarl_init_prop_file_field(fnm(i_),prop(i_),xLimBoundLoc,datasamples)
     end do 
-    if (rk_==7) write(*,*) 'xSplit',xSplit  
-    if (rk_==7) write(*,*) 'xLimBoundLoc',xLimBoundLoc
-    call MPI_BARRIER(comm,code)
     
     deallocate(dims)
     deallocate(fnm)
     deallocate(deltax)
     deallocate(xSplit)
     deallocate(idxg)
+    deallocate(datasamples)
     call finalize()
 
     contains

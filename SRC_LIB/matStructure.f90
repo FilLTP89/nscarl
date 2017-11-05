@@ -166,54 +166,55 @@ contains
         
     end subroutine create_global_index
 
-!    subroutine nscarl_init_prop_file_field(fnm, propName, xLimBoundLoc, var)
-!        use hdf5
-!        use sem_hdf5
-!
-!        character(len=200), intent(in) :: fnm ! file names
-!        character(len=200), intent(in) :: propName ! file names
-!        real(fpp), dimension(0:5), intent(in) :: xLimBoundLoc
-!        !
-!        real(fpp),dimension(:,:,:), allocatable :: var
-!        !
-!        integer :: i_, hdferr
-!        integer(HID_T) :: file_id, grp_id
-!        integer(HSIZE_T), dimension(:), allocatable :: dimst
-!        logical :: subgrp
-!        real(fpp), dimension(0:2) :: xMinGlob, xMaxGlob, dims
-!
-!        call init_hdf5()
-!        call h5fopen_f(fnm, H5F_ACC_RDONLY_F, file_id, hdferr) !Open File
-!        if(hdferr /= 0) then
-!            write(*,*) "Could not open file:", fnm 
-!            stop 1
-!        end if
-!        subgrp = prop_check_var(file_id, propName, grp_id)
-!        if (.not. subgrp) then
-!            grp_id = file_id
-!        end if
-!        call read_attr_real_vec(grp_id, "xMinGlob", xMinGlob)
-!        call read_attr_real_vec(grp_id, "xMaxGlob", xMaxGlob)
-!        call read_dims(grp_id, "samples", dimst)
-!        dims=dimst
-!        ! On va calculer les indices i0,i1 j0,j1,k0,k1 tels que
-!        ! i0 plus grand entier tel que x(i0)<MinBound_loc(0), 
-!        ! i1 plus petit entier tel que x(i1)>MaxBound_loc(0), etc... 
-!
-!        do i_ = 0,2
-!            imin(i_) = gindex(xLimBoundLoc(0+i_), dims(i_), xMinGlob(i_), xMaxGlob(i_))
-!            imax(i_) = gindex(xLimBoundLoc(3+i_), dims(i_), xMinGlob(i_), xMaxGlob(i_))+1
-!            step(i_) = (xMaxGlob(i_)-xMinGlob(i_))/(dims(i_)-1)
-!            if (imin(i_)<0) imin(i_) = 0
-!            if (imax(i_)< imin(i_)) imax(i_) = imin(i_)
-!            if (imax(i_)>=dims(i_)) imax(i_) = dims(i_)-1
-!            if (imin(i_)> imax(i_)) imin(i_) = imax(i_)
-!        end do
-!        
-!        call read_subset_3d_real(grp_id, "samples", imin, imax, var)
-!        if (subgrp) call H5Gclose_f(grp_id, hdferr)
-!        call H5Fclose_f(file_id, hdferr)
-!    end subroutine nscarl_init_prop_file_field
+    subroutine nscarl_init_prop_file_field(fnm, propName, xLimBoundLoc, var)
+        use hdf5
+        use sem_hdf5
+
+        character(len=200), intent(in) :: fnm ! file names
+        character(len=200), intent(in) :: propName ! file names
+        real(fpp), dimension(0:5), intent(in) :: xLimBoundLoc
+        !
+        real(fpp),dimension(:,:,:), allocatable, intent(out) :: var
+        !
+        integer :: i_, hdferr
+        integer(HID_T) :: file_id, grp_id
+        integer(HSIZE_T), dimension(:), allocatable :: dimst
+        logical :: subgrp
+        real(fpp), dimension(0:2) :: xMinGlob, xMaxGlob
+        integer, dimension(0:2) :: imin,imax,step,dims
+
+        call init_hdf5()
+        call h5fopen_f(fnm, H5F_ACC_RDONLY_F, file_id, hdferr) !Open File
+        if(hdferr /= 0) then
+            write(*,*) "Could not open file:", fnm 
+            stop 1
+        end if
+        subgrp = prop_check_var(file_id, propName, grp_id)
+        if (.not. subgrp) then
+            grp_id = file_id
+        end if
+        call read_attr_real_vec(grp_id, "xMinGlob", xMinGlob)
+        call read_attr_real_vec(grp_id, "xMaxGlob", xMaxGlob)
+        call read_dims(grp_id, "samples", dimst)
+        dims=dimst
+        ! On va calculer les indices i0,i1 j0,j1,k0,k1 tels que
+        ! i0 plus grand entier tel que x(i0)<MinBound_loc(0), 
+        ! i1 plus petit entier tel que x(i1)>MaxBound_loc(0), etc... 
+
+        do i_ = 0,2
+            imin(i_) = gindex(xLimBoundLoc(0+i_), dims(i_), xMinGlob(i_), xMaxGlob(i_))
+            imax(i_) = gindex(xLimBoundLoc(3+i_), dims(i_), xMinGlob(i_), xMaxGlob(i_))+1
+            step(i_) = (xMaxGlob(i_)-xMinGlob(i_))/(dims(i_)-1)
+            if (imin(i_)<0) imin(i_) = 0
+            if (imax(i_)< imin(i_)) imax(i_) = imin(i_)
+            if (imax(i_)>=dims(i_)) imax(i_) = dims(i_)-1
+            if (imin(i_)> imax(i_)) imin(i_) = imax(i_)
+        end do
+        
+        call read_subset_3d_real(grp_id, "samples", imin, imax, var)
+        if (subgrp) call H5Gclose_f(grp_id, hdferr)
+        call H5Fclose_f(file_id, hdferr)
+    end subroutine nscarl_init_prop_file_field
 end module matStructure
 !! Local Variables:
 !! mode: f90
