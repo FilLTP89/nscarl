@@ -6,15 +6,8 @@ INCLUDEHDF5 = -I ~/LOCAL/include
 LIBMPI      = -L/gpfs/opt/compilers/intel/compilers_and_libraries_2016.1.150/linux/mpi/intel64/lib -lmpi -lmpi_dbg -lmpi_mt -lmpigf -lmpi_ilp64
 INCLUDEMPI  = -I/gpfs/opt/compilers/intel/compilers_and_libraries_2016.1.150/linux/mpi/intel64/include
 
-LIBMPI      = -L/gpfs/opt/compilers/intel/compilers_and_libraries_2016.1.150/linux/mpi/intel64/lib -lmpi -lmpi_dbg -lmpi_mt -lmpigf -lmpi_ilp64
-INCLUDEMPI  = -I/gpfs/opt/compilers/intel/compilers_and_libraries_2016.1.150/linux/mpi/intel64/include
-
-#LIBFFTW     = -L ~/LOCAL/lib -lfftw3_mpi -lfftw3 -lfftw3_threads
-#INCLUDEFFTW = -I ~/LOCAL/include
-
 EXEC  = merge3dFields.exe
-#EXEC2 = statistics.exe
-#LIB1 = libRF.a
+
 FC   = mpiifort
 FFLAGS = -g -O1 -cpp #-DMAKELOG
 
@@ -24,9 +17,6 @@ RM := rm -rf
 #Specifying the sources "f90" and "f"
 SRCS = $(wildcard *.f90 *.f) 
 
-#Create a ".f90" for each source
-#OBJS = $(SRCS:.f90=.o) #SYNTAX NOT WORKING
-
 RF_OBJ += ./merge3dFields.o
 
 LIB_OBJ += ./sem_hdf5.o \
@@ -34,8 +24,6 @@ LIB_OBJ += ./sem_hdf5.o \
 
 COMM_OBJ += ./constants.o
 
-#LIBS = $(LIBHDF5) $(LIBMPI) $(LIBFFTW)
-#INCLUDE = $(INCLUDEHDF5) $(INCLUDEMPI) $(INCLUDEFFTW)
 LIBS = $(LIBHDF5) $(LIBMPI) 
 INCLUDE = $(INCLUDEHDF5) $(INCLUDEMPI) 
 

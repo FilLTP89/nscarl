@@ -86,10 +86,9 @@ program merge3dFields
         end do
     end do
     ! partitioning
-    npt(0) = ceiling(npr**(1.0/3.0))
-    npt(1) = npt(0) 
-    npt(2) = npr-product(npt(0:1))
-    if (rk_==0) write(*,*) 'npt',npt
+    npt(0) = floor(log(real(npr,fpp))/log(3.0d0))
+    npt(1) = floor(log(real(npr,fpp))/log(3.0d0))
+    npt(2) = floor(log(real(npr,fpp))/log(3.0d0))   
     allocate(xSplit(0:npr+2))
     k_=0
     do i_=0,2
@@ -100,9 +99,9 @@ program merge3dFields
         k_=k_+npt(i_)+1
     end do
     allocate(idxg(0:2,0:npr-1))
-    if (rk_.eq.0)  call create_global_index(npr,npt,3,idxg)
-    if (rk_.eq.0) write(*,*) idxg
+    call create_global_index(npr,npt,3,idxg)
     call MPI_BARRIER(comm,code)
+
     deallocate(dims)
     deallocate(fnm)
     call finalize()

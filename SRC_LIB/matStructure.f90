@@ -151,12 +151,11 @@ contains
         ccc_=0
         if (dims.eq.3) then
             do k_=0,npt(2)-1
-                ccc_=ccc_+k_*npt(1)*npt(0)
+                ccc_=k_*npt(1)*npt(0)
                 do j_=0,npt(1)-1
                     cc_=ccc_+j_*npt(0)
                     do i_=0,npt(0)-1
                         c_ = cc_+i_
-                        write(*,*) 'c_',ccc_,cc_,c_
                         idxg(0,c_)=i_
                         idxg(1,c_)=j_
                         idxg(2,c_)=k_
