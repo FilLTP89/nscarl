@@ -166,7 +166,7 @@ contains
         
     end subroutine create_global_index
 
-    subroutine nscarl_init_prop_file_field(fnm, propName, xLimBoundLoc, var)
+    subroutine nscarl_init_prop_file_field(fnm,propName,xLimBoundLoc,var,imin,imax)
         use hdf5
         use sem_hdf5
 
@@ -175,14 +175,17 @@ contains
         real(fpp), dimension(0:5), intent(in) :: xLimBoundLoc
         !
         real(fpp),dimension(:,:,:), allocatable, intent(out) :: var
+        integer, dimension(0:2), intent(inout) :: imin,imax
         !
         integer :: i_, hdferr
         integer(HID_T) :: file_id, grp_id
         integer(HSIZE_T), dimension(:), allocatable :: dimst
         logical :: subgrp
         real(fpp), dimension(0:2) :: xMinGlob, xMaxGlob
-        integer, dimension(0:2) :: imin,imax,step,dims
+        integer, dimension(0:2) :: step,dims
 
+        imin(0:2)=0
+        imax(0:2)=0
         call init_hdf5()
         call h5fopen_f(fnm, H5F_ACC_RDONLY_F, file_id, hdferr) !Open File
         if(hdferr /= 0) then
@@ -215,6 +218,60 @@ contains
         if (subgrp) call H5Gclose_f(grp_id, hdferr)
         call H5Fclose_f(file_id, hdferr)
     end subroutine nscarl_init_prop_file_field
+
+    subroutine nscarl_interpolate_elem_field(imin,imax,var,xx,MinBound,step,nsf,field)
+        ! intent IN
+        real(fpp), dimension(0:2), intent(in) :: imin,imax ! indexes
+        real(fpp), dimension(imin(0):imax(0),imin(1):imax(1),imin(2):imax(2)), intent(in) :: var
+        real(fpp), dimension(0:2), intent(in) :: xx ! node coord
+        real(fpp), dimension(0:2), intent(in) :: MinBound ! minimum domain bounds
+        real(fpp), dimension(0:2), intent(in) :: step ! discretization step
+        integer,   dimension(0:2), intent(in) :: nsf ! number of points per dir
+        ! intent OUT
+        real(fpp), dimension(0:nsf(0)-1,0:nsf(1)-1,0:nsf(2)-1), intent(out) :: field
+        !
+        real(fpp), dimension(0:2) :: aa ! node interpolation coeffs
+        real(fpp) :: pos, val
+        integer :: i,j,k     ! gll index
+        integer :: idef      ! global coord index
+        integer :: n ! dimension index
+        integer, dimension(0:2) :: ii  ! index of x,y,z inside material domain
+
+        do k = 0,nsf(2)-1
+            do j = 0,nsf(1)-1
+                do i = 0,nsf(0)-1
+                    do n=0,2
+                        !xx(n) = Tdomain%GlobCoord(n,idef)
+                        ! Traitement PML : on echantillonne au bord de la PML uniquement
+                        !if (pml) then
+                        !    if (mat%pml_width(n)>0) then
+                        !        if (xx(n)>mat%pml_pos(n)) xx(n)=mat%pml_pos(n)
+                        !    end if
+                        !    if (mat%pml_width(n)<0) then
+                        !        if (xx(n)<mat%pml_pos(n)) xx(n)=mat%pml_pos(n)
+                        !    end if
+                        !end if
+                        pos = (xx(n)-MinBound(n))/step(n)
+                        ii(n) = floor(pos)
+                        if (ii(n)  < imin(n)) ii(n) = imin(n)
+                        if (ii(n) >= imax(n)) ii(n) = imax(n)-1
+                        aa(n) = pos-ii(n)
+                    end do
+                    ! trilinear interpolation
+                    val =       (1.-aa(0))*(1.-aa(1))*(1.-aa(2))*var(ii(0)  ,ii(1)  ,ii(2)  )
+                    val = val + (   aa(0))*(1.-aa(1))*(1.-aa(2))*var(ii(0)+1,ii(1)  ,ii(2)  )
+                    val = val + (1.-aa(0))*(   aa(1))*(1.-aa(2))*var(ii(0)  ,ii(1)+1,ii(2)  )
+                    val = val + (   aa(0))*(   aa(1))*(1.-aa(2))*var(ii(0)+1,ii(1)+1,ii(2)  )
+                    val = val + (1.-aa(0))*(1.-aa(1))*(   aa(2))*var(ii(0)  ,ii(1)  ,ii(2)+1)
+                    val = val + (   aa(0))*(1.-aa(1))*(   aa(2))*var(ii(0)+1,ii(1)  ,ii(2)+1)
+                    val = val + (1.-aa(0))*(   aa(1))*(   aa(2))*var(ii(0)  ,ii(1)+1,ii(2)+1)
+                    val = val + (   aa(0))*(   aa(1))*(   aa(2))*var(ii(0)+1,ii(1)+1,ii(2)+1)
+                    field(i,j,k) = val
+                end do
+            end do
+        end do
+    end subroutine nscarl_interpolate_elem_field
+
 end module matStructure
 !! Local Variables:
 !! mode: f90
