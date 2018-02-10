@@ -36,11 +36,13 @@ program merge3dFields
 
     ! partitioning
     real(fpp), dimension(0:2) :: dxSplit
-    real(fpp), dimension(:), allocatable :: xSplit, deltax  
+    real(fpp), dimension(:), allocatable :: xSplit  
     ! data samples
     integer(fpp), dimension(:,:), allocatable :: idxg
     integer(fpp), dimension(0:2) :: idxp
+    integer, dimension(0:2) :: imins,imaxs
     real(fpp), allocatable, dimension(:,:,:) :: datasamples
+    integer(fpp), allocatable, dimension(:,:) :: imin,imax,idms
 
     comm = MPI_COMM_WORLD
     call init(comm)
@@ -74,15 +76,13 @@ program merge3dFields
     call MPI_BCAST(fnm, nf, MPI_CHAR, 0, comm, code) 
     call MPI_BCAST(prop, np, MPI_CHAR, 0, comm, code) 
     allocate(dims(0:3*nfm-1))
-    allocate(deltax(0:3*nfm-1))
-    xLimBound(0:5) = 1e+20
+    xLimBound(0:2) = -1.0e+20
+    xLimBound(3:5) = +1.0e+20
     do i_=0,nfm-1
         call parse_mf_prop_nscarl(fnm(i_),xMinGlob,xMaxGlob,dimst)
         dims(3*i_:3*(i_+1)-1) = dimst
-        if (rk_.eq.0) write(*,*) 'DIMS:', dimst
         do j_=0,2
-            deltax(3*i_+j_) = (xMaxGlob(j_)-xMinGlob(j_))/(dims(3*i_+j_)-1)
-            xLimBound(0+j_) = min(xLimBound(0+j_),xMinGlob(j_))
+            xLimBound(0+j_) = max(xLimBound(0+j_),xMinGlob(j_))
             xLimBound(3+j_) = min(xLimBound(3+j_),xMaxGlob(j_))
         end do
     end do
@@ -102,19 +102,28 @@ program merge3dFields
     allocate(idxg(0:2,0:npr-1))
     call create_global_index(npr,npt,3,idxg)
     idxp = idxg(:,rk_)
-    do i_=1,nfm-1
+    allocate(imin(0:2,0:nfm-1))
+    allocate(imax(0:2,0:nfm-1))
+    allocate(idms(0:2,0:nfm-1))
+    
+    do i_=0,nfm-1
         k_=0
         do j_=0,2
             xLimBoundLoc(0+j_)=xSplit(k_+idxp(j_))
             xLimBoundLoc(3+j_)=xSplit(k_+idxp(j_)+1)
             k_=k_+npt(j_)+1
         end do
-        call nscarl_init_prop_file_field(fnm(i_),prop(i_),xLimBoundLoc,datasamples)
+        call nscarl_init_prop_file_field(fnm(i_),prop(i_),xLimBoundLoc,&
+            datasamples,imins,imaxs)
+        imin(0:2,i_)=imins
+        imax(0:2,i_)=imaxs  
+        idms(0:2,i_)=shape(datasamples)
+        write(*,*)'rk-shape',rk_,idms
     end do 
-    
+    !call nscarl_interpolate_elem_field(imin,imax,datasamples,xx,&
+    !    xLimBoundLoc,step,nsf,field)
     deallocate(dims)
     deallocate(fnm)
-    deallocate(deltax)
     deallocate(xSplit)
     deallocate(idxg)
     deallocate(datasamples)
